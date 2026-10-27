@@ -1,0 +1,223 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Represents the authenticated clinical operator profile at a PHC or Arogya Mandir.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The Firebase Auth UID of the clinical operator."
+        },
+        "email": {
+          "type": "string",
+          "description": "Operator email address."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Full name of the clinical operator."
+        },
+        "facilityId": {
+          "type": "string",
+          "description": "Government PHC facility identifier (e.g. PHC-CHV-501)."
+        },
+        "role": {
+          "type": "string",
+          "description": "Role in PHC: MO (Medical Officer) or ANM (Auxiliary Nurse Midwife)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp; clients must submit FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp; clients must submit FieldValue.serverTimestamp()."
+        }
+      },
+      "required": ["userId", "email", "createdAt", "updatedAt"]
+    },
+    "Patient": {
+      "title": "Patient",
+      "description": "Patient demographic, ABHA profile, and chronic condition record.",
+      "type": "object",
+      "properties": {
+        "patientId": {
+          "type": "string",
+          "description": "Unique patient ID (e.g. PAT-XXXXXX)."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Auth UID of the operator who created/manages this patient record."
+        },
+        "abhaNumber": {
+          "type": "string",
+          "pattern": "^[0-9]{2}-[0-9]{4}-[0-9]{4}-[0-9]{4}$",
+          "description": "14-digit Ayushman Bharat Health Account ID in XX-XXXX-XXXX-XXXX format (e.g. 91-4432-8810-1209)."
+        },
+        "encryptedAbha": {
+          "type": "string",
+          "description": "AES-256-GCM encrypted ABHA number for secure storage."
+        },
+        "abhaBlindIndex": {
+          "type": "string",
+          "description": "Deterministic HMAC-SHA256 blind index hash for zero-knowledge indexed search."
+        },
+        "name": {
+          "type": "string",
+          "description": "Full patient name."
+        },
+        "age": {
+          "type": "integer",
+          "description": "Patient age in years."
+        },
+        "gender": {
+          "type": "string",
+          "enum": ["Female", "Male", "Other"],
+          "description": "Patient gender."
+        },
+        "isPregnant": {
+          "type": "boolean",
+          "description": "High-risk pregnancy flag for maternal triage."
+        },
+        "phone": {
+          "type": "string",
+          "description": "Patient or family mobile phone number."
+        },
+        "village": {
+          "type": "string",
+          "description": "Patient village / settlement location."
+        },
+        "activeMedications": {
+          "type": "string",
+          "description": "Existing medications for chronic conditions (e.g. Warfarin, Metformin)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp; clients must submit FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp; clients must submit FieldValue.serverTimestamp()."
+        }
+      },
+      "required": ["patientId", "userId", "abhaNumber", "name", "age", "gender", "createdAt", "updatedAt"]
+    },
+    "Encounter": {
+      "title": "Encounter",
+      "description": "Clinical encounter event with triage classification, SOAP note, NCERx e-prescription, and NHCX claim data.",
+      "type": "object",
+      "properties": {
+        "encounterId": {
+          "type": "string",
+          "description": "Unique encounter ID (e.g. ENC-XXXXXX)."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Auth UID of the clinician logging the encounter."
+        },
+        "patientId": {
+          "type": "string",
+          "description": "Reference to the patient being evaluated."
+        },
+        "facilityId": {
+          "type": "string",
+          "description": "PHC Facility ID."
+        },
+        "operatorId": {
+          "type": "string",
+          "description": "ANM or MO designation ID."
+        },
+        "triageTier": {
+          "type": "string",
+          "enum": ["RED", "YELLOW", "GREEN"],
+          "description": "Clinical urgency classification tier."
+        },
+        "triageRationale": {
+          "type": "string",
+          "description": "Clinical rationale explaining the triage urgency."
+        },
+        "referralRequired": {
+          "type": "boolean",
+          "description": "Flag for immediate tertiary hospital referral advisory."
+        },
+        "chiefComplaint": {
+          "type": "string",
+          "description": "Standardized primary medical complaint."
+        },
+        "rawVoiceTranscript": {
+          "type": "string",
+          "description": "Raw Telugu/Hindi/English code-switching voice transcript or clinical notes."
+        },
+        "soapJson": {
+          "type": "string",
+          "description": "Serialized SOAP note JSON payload."
+        },
+        "fhirBundleJson": {
+          "type": "string",
+          "description": "HL7 FHIR R4 ClinicalImpression and MedicationRequest resource bundle."
+        },
+        "vitalsSummary": {
+          "type": "string",
+          "description": "Summary string of vitals (BP, SpO2, Pulse, Temp, Sugar)."
+        },
+        "bloodPressure": {
+          "type": "string",
+          "description": "Blood pressure string (e.g. 160/100 mmHg)."
+        },
+        "spo2": {
+          "type": "integer",
+          "description": "Oxygen saturation percentage."
+        },
+        "heartRate": {
+          "type": "integer",
+          "description": "Pulse / heart rate in beats per minute."
+        },
+        "prescribedMedications": {
+          "type": "string",
+          "description": "Generic medication regimens advised (e.g. Metformin 500mg BD)."
+        },
+        "syncedNhcx": {
+          "type": "boolean",
+          "description": "Flag indicating successful upload to National Health Claims Exchange."
+        },
+        "syncedFhir": {
+          "type": "boolean",
+          "description": "Flag indicating successful sync to ABDM FHIR gateway."
+        },
+        "syncStatus": {
+          "type": "string",
+          "description": "Sync status: SYNCED or CACHED_OFFLINE."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp; clients must submit FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp; clients must submit FieldValue.serverTimestamp()."
+        }
+      },
+      "required": ["encounterId", "userId", "patientId", "triageTier", "chiefComplaint", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Authenticated clinical operator profile collection."
+    },
+    "/users/{userId}/patients/{patientId}": {
+      "schema": "Patient",
+      "description": "Per-operator patient directory with ABHA IDs."
+    },
+    "/users/{userId}/encounters/{encounterId}": {
+      "schema": "Encounter",
+      "description": "Clinical encounter records with triage, SOAP notes, and sync status."
+    }
+  }
+}

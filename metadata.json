@@ -1,0 +1,11 @@
+{
+  "name": "Facility Portal",
+  "description": "Rigveda Neural Grid Core Clinical Agent - Offline-native CDSS with Real-time Speech-to-Text, Gemini SOAP, ABHA QR Scanner, and NHCX Interoperability",
+  "requestFramePermissions": [
+    "android.permission.CAMERA",
+    "android.permission.RECORD_AUDIO"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

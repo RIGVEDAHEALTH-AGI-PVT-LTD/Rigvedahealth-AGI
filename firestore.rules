@@ -1,0 +1,67 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidTimestamp(val) {
+      return val is timestamp && val <= request.time;
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.userId == userId
+        && data.email is string
+        && isValidTimestamp(data.createdAt)
+        && isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidPatient(data, userId) {
+      return data.userId == userId
+        && data.patientId is string && data.patientId.size() > 0
+        && data.abhaNumber is string && data.abhaNumber.matches('^[0-9]{2}-[0-9]{4}-[0-9]{4}-[0-9]{4}$')
+        && data.name is string && data.name.size() > 0
+        && data.age is int && data.age >= 0
+        && data.gender in ['Female', 'Male', 'Other']
+        && isValidTimestamp(data.createdAt)
+        && isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidEncounter(data, userId) {
+      return data.userId == userId
+        && data.encounterId is string && data.encounterId.size() > 0
+        && data.patientId is string && data.patientId.size() > 0
+        && data.triageTier in ['RED', 'YELLOW', 'GREEN']
+        && data.chiefComplaint is string
+        && isValidTimestamp(data.createdAt)
+        && isValidTimestamp(data.updatedAt);
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserProfile(request.resource.data, userId);
+      allow update: if isOwner(userId) && isValidUserProfile(request.resource.data, userId) && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isOwner(userId);
+
+      match /patients/{patientId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidPatient(request.resource.data, userId);
+        allow update: if isOwner(userId) && isValidPatient(request.resource.data, userId) && request.resource.data.createdAt == resource.data.createdAt;
+        allow delete: if isOwner(userId);
+      }
+
+      match /encounters/{encounterId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidEncounter(request.resource.data, userId);
+        allow update: if isOwner(userId) && isValidEncounter(request.resource.data, userId) && request.resource.data.createdAt == resource.data.createdAt;
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}
